@@ -48,7 +48,7 @@ pipeline {
             steps {
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-ecr-creds'
+                    credentialsId: '856862064332'
                 ]]) {
                     sh '''
                         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
