@@ -46,15 +46,23 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                sh '''
-                    aws ecr get-login-password --region "$AWS_REGION" \
-                      | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+                withCredentials([usernamePassword(
+                    credentialsId: 'aws-ecr-creds',
+                    usernameVariable: 'AWS_ACCESS_KEY_ID',
+                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                )]) {
+                    sh '''
+                        unset AWS_SESSION_TOKEN AWS_PROFILE AWS_DEFAULT_PROFILE
+                        aws sts get-caller-identity --query Account --output text
+                        aws ecr get-login-password --region "$AWS_REGION" \
+                          | docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
-                    for repository in streaming-auth streaming-stream streaming-admin streaming-chat streaming-frontend; do
-                      aws ecr describe-repositories --repository-names "$repository" --region "$AWS_REGION" >/dev/null
-                      docker push "$ECR_REGISTRY/$repository:$IMAGE_TAG"
-                    done
-                '''
+                        for repository in streaming-auth streaming-stream streaming-admin streaming-chat streaming-frontend; do
+                          aws ecr describe-repositories --repository-names "$repository" --region "$AWS_REGION" >/dev/null
+                          docker push "$ECR_REGISTRY/$repository:$IMAGE_TAG"
+                        done
+                    '''
+                }
             }
         }
     }
