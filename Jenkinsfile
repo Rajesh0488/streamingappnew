@@ -44,29 +44,81 @@ pipeline {
             }
         }
 
-        stage('Push to ECR') {
+         stage('Push Images to ECR') {
             steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-ecr-credsstreaming-raje'
-                ]]) {
+                withAWS(
+                    credentials: 'aws-ecr-credsstreaming-raje',
+                    region: 'ap-south-1'
+                ) {
                     sh '''
-                        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-                        echo "Authenticated AWS account: $ACCOUNT_ID"
-                        test "$ACCOUNT_ID" = "$AWS_ACCOUNT_ID" || {
-                          echo "AWS credentials do not belong to expected account $AWS_ACCOUNT_ID"
-                          exit 1
-                        }
-                        aws ecr get-login-password --region "$AWS_REGION" \
-                          | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+                        set -e
 
-                        for repository in streaming-auth streaming-stream streaming-admin streaming-chat streaming-frontend; do
-                          aws ecr describe-repositories --repository-names "$repository" --region "$AWS_REGION" >/dev/null
-                          docker push "$ECR_REGISTRY/$repository:$IMAGE_TAG"
-                        done
+                        echo "===== Tagging Auth Image ====="
+                        docker tag \
+                            streaming-auth:${IMAGE_TAG} \
+                            ${ECR_REGISTRY}/streaming-auth:${IMAGE_TAG}
+
+                        echo "===== Pushing Auth Image ====="
+                        docker push \
+                            ${ECR_REGISTRY}/streaming-auth:${IMAGE_TAG}
+
+
+                        echo "===== Tagging Streaming Image ====="
+                        docker tag \
+                            streaming-stream:${IMAGE_TAG} \
+                            ${ECR_REGISTRY}/streaming-stream:${IMAGE_TAG}
+
+                        echo "===== Pushing Streaming Image ====="
+                        docker push \
+                            ${ECR_REGISTRY}/streaming-stream:${IMAGE_TAG}
+
+
+                        echo "===== Tagging Admin Image ====="
+                        docker tag \
+                            streaming-admin:${IMAGE_TAG} \
+                            ${ECR_REGISTRY}/streaming-admin:${IMAGE_TAG}
+
+                        echo "===== Pushing Admin Image ====="
+                        docker push \
+                            ${ECR_REGISTRY}/streaming-admin:${IMAGE_TAG}
+
+
+                        echo "===== Tagging Chat Image ====="
+                        docker tag \
+                            streaming-chat:${IMAGE_TAG} \
+                            ${ECR_REGISTRY}/streaming-chat:${IMAGE_TAG}
+
+                        echo "===== Pushing Chat Image ====="
+                        docker push \
+                            ${ECR_REGISTRY}/streaming-chat:${IMAGE_TAG}
+
+
+                        echo "===== Tagging Frontend Image ====="
+                        docker tag \
+                            streaming-frontend:${IMAGE_TAG} \
+                            ${ECR_REGISTRY}/streaming-frontend:${IMAGE_TAG}
+
+                        echo "===== Pushing Frontend Image ====="
+                        docker push \
+                            ${ECR_REGISTRY}/streaming-frontend:${IMAGE_TAG}
+
+
+                        echo "===== All Images Pushed Successfully ====="
                     '''
                 }
             }
+        }
+
+    }
+}
+
+post {
+        success {
+            echo 'StreamingApp CI/CD pipeline completed successfully.'
+        }
+
+        failure {
+            echo 'StreamingApp CI/CD pipeline failed.'
         }
     }
 }
