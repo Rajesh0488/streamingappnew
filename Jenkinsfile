@@ -4,8 +4,9 @@ pipeline {
     environment {
         AWS_REGION = 'us-east-1'
         AWS_ACCOUNT_ID = '856862064332'
-        ECR_REGISTRY = "856862064332.dkr.ecr.us-east-1.amazonaws.com"
-
+        ECR_REGISTRY = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+        IMAGE_TAG = '1.0.0'
+        APP_BASE_URL = 'https://imreading.xyz'
     }
 
     stages {
@@ -18,19 +19,26 @@ pipeline {
         stage('Build Images') {
             steps {
                 sh '''
-                    docker build -t streaming-auth:1.0.0 \
+                    docker build -t ${ECR_REGISTRY}/streaming-auth:${IMAGE_TAG} \
                       backend/authService
 
-                    docker build -t streaming-stream:1.0.0 \
+                    docker build -t ${ECR_REGISTRY}/streaming-stream:${IMAGE_TAG} \
                       -f backend/streamingService/Dockerfile backend
 
-                    docker build -t streaming-admin:1.0.0 \
+                    docker build -t ${ECR_REGISTRY}/streaming-admin:${IMAGE_TAG} \
                       -f backend/adminService/Dockerfile backend
 
-                    docker build -t streaming-chat:1.0.0 \
+                    docker build -t ${ECR_REGISTRY}/streaming-chat:${IMAGE_TAG} \
                       -f backend/chatService/Dockerfile backend
 
-                    docker build -t streaming-frontend:1.0.0 \
+                    docker build \
+                      --build-arg REACT_APP_AUTH_API_URL=${APP_BASE_URL}/api \
+                      --build-arg REACT_APP_STREAMING_API_URL=${APP_BASE_URL}/api \
+                      --build-arg REACT_APP_STREAMING_PUBLIC_URL=${APP_BASE_URL} \
+                      --build-arg REACT_APP_ADMIN_API_URL=${APP_BASE_URL}/api/admin \
+                      --build-arg REACT_APP_CHAT_API_URL=${APP_BASE_URL}/api/chat \
+                      --build-arg REACT_APP_CHAT_SOCKET_URL=${APP_BASE_URL} \
+                      -t ${ECR_REGISTRY}/streaming-frontend:${IMAGE_TAG} \
                       frontend
                 '''
             }
@@ -38,8 +46,15 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                // Authenticate and push using Jenkins-managed AWS credentials.
-                echo 'Configure ECR push steps for your Jenkins environment.'
+                sh '''
+                    aws ecr get-login-password --region "$AWS_REGION" \
+                      | docker login --username AWS --password-stdin "$ECR_REGISTRY"
+
+                    for repository in streaming-auth streaming-stream streaming-admin streaming-chat streaming-frontend; do
+                      aws ecr describe-repositories --repository-names "$repository" --region "$AWS_REGION" >/dev/null
+                      docker push "$ECR_REGISTRY/$repository:$IMAGE_TAG"
+                    done
+                '''
             }
         }
     }
