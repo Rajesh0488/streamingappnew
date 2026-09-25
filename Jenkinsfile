@@ -46,14 +46,17 @@ pipeline {
 
         stage('Push to ECR') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'aws-ecr-creds',
-                    usernameVariable: 'AWS_ACCESS_KEY_ID',
-                    passwordVariable: 'AWS_SECRET_ACCESS_KEY'
-                )]) {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-ecr-creds'
+                ]]) {
                     sh '''
-                        unset AWS_SESSION_TOKEN AWS_PROFILE AWS_DEFAULT_PROFILE
-                        aws sts get-caller-identity --query Account --output text
+                        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+                        echo "Authenticated AWS account: $ACCOUNT_ID"
+                        test "$ACCOUNT_ID" = "$AWS_ACCOUNT_ID" || {
+                          echo "AWS credentials do not belong to expected account $AWS_ACCOUNT_ID"
+                          exit 1
+                        }
                         aws ecr get-login-password --region "$AWS_REGION" \
                           | docker login --username AWS --password-stdin "$ECR_REGISTRY"
 
