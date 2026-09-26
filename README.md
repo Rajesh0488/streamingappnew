@@ -256,6 +256,11 @@ kubectl scale deployment/streaming \
 
 <img width="1260" height="648" alt="image" src="https://github.com/user-attachments/assets/f304631a-63e4-4ba0-8069-19d03fe01dee" />
 
+<img width="1365" height="623" alt="image" src="https://github.com/user-attachments/assets/f0d01dfb-32f6-49ec-9d5e-d759bd64ce71" />
+
+<img width="1362" height="562" alt="image" src="https://github.com/user-attachments/assets/a523ebf5-51d3-4061-ae84-4b34e7341732" />
+
+
 # 12. Cloud watch 
 
 <img width="742" height="529" alt="image" src="https://github.com/user-attachments/assets/58846aaf-5fd5-42e6-94ed-7f24c94acbd0" />
