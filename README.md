@@ -1,4 +1,4 @@
-<img width="1365" height="540" alt="image" src="https://github.com/user-attachments/assets/2d045f54-d60f-4ce1-8dcd-9536f9de5ce2" /># StreamingApp — Kubernetes Container Orchestration & Scaling
+# StreamingApp — Kubernetes Container Orchestration & Scaling
 
           A multi-service MERN/Streaming application containerized with Docker, packaged with Helm, deployed on Amazon EKS, exposed through an AWS Application Load Balancer, and verified with scaling, rolling updates, live chat, video upload/playback, and Kubernetes self-healing.
 
@@ -256,17 +256,17 @@ kubectl scale deployment/streaming \
 
 <img width="1260" height="648" alt="image" src="https://github.com/user-attachments/assets/f304631a-63e4-4ba0-8069-19d03fe01dee" />
 
-# 12. Cleanup
+# 12. Cloud watch 
+
+<img width="742" height="529" alt="image" src="https://github.com/user-attachments/assets/58846aaf-5fd5-42e6-94ed-7f24c94acbd0" />
+
+# 13. Cleanup
 
 <img width="626" height="72" alt="image" src="https://github.com/user-attachments/assets/dc95aa73-e6de-4fc0-96d6-9e78a5e2eab2" />
 
 <img width="998" height="303" alt="image" src="https://github.com/user-attachments/assets/1f6d70b2-5ca8-41a1-bdd7-9866bbb0c4cd" />
 
 
-
-# 12. Cloud watch 
-
-<img width="742" height="529" alt="image" src="https://github.com/user-attachments/assets/58846aaf-5fd5-42e6-94ed-7f24c94acbd0" />
 
 
 
